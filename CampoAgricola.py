@@ -1,3 +1,4 @@
+# CampoAgricola.py
 from ListaEnlazadaSimple import ListaEnlazadaSimple
 from RepresentacionMatriz import RepresentacionMatriz
 from SensorMedicion import SensorMedicion
@@ -18,6 +19,29 @@ class CampoAgricola:
         self.estaciones_reducidas = None
         self.sensores_suelo_reducidos = None
         self.sensores_cultivo_reducidos = None
+
+    def mostrar_matriz(self, matriz, titulo, lista_filas, lista_columnas):
+        """Muestra una matriz en consola con formato tabular"""
+        print("\n" + "="*60)
+        print(titulo)
+        print("-" * 60)
+
+        # Encabezado
+        print("Estacion\\Sensor", end="\t")
+        for j in range(lista_columnas.tamanio()):
+            sensor = lista_columnas.obtener_en(j)
+            print(f"{sensor.id}", end="\t")
+        print()
+
+        # Filas
+        for i in range(lista_filas.tamanio()):
+            estacion = lista_filas.obtener_en(i)
+            print(f"{estacion.id}", end="\t\t")
+            for j in range(lista_columnas.tamanio()):
+                reg = matriz.extraer(i, j)
+                print(f"{reg.valor}", end="\t")
+            print()
+        print("="*60)
 
     def construir_matrices_frecuencia(self):
         filas = self.estaciones.tamanio()
@@ -107,3 +131,33 @@ class CampoAgricola:
                     self.sensores_cultivo_reducidos.obtener_en(j).registros.agregar(frec_nueva)
 
             id_reducido += 1
+
+    def obtener_matriz_reducida_suelo(self):
+        filas = self.estaciones_reducidas.tamanio()
+        cols = self.sensores_suelo_reducidos.tamanio()
+        matriz = RepresentacionMatriz(filas, cols)
+        for j in range(cols):
+            sensor = self.sensores_suelo_reducidos.obtener_en(j)
+            actual = sensor.registros.primero
+            while actual:
+                reg = actual.contenido
+                i = self.estaciones_reducidas.buscar_por_atributo('id', reg.id_estacion)
+                if i != -1:
+                    matriz.asignar(i, j, reg)
+                actual = actual.siguiente
+        return matriz
+
+    def obtener_matriz_reducida_cultivo(self):
+        filas = self.estaciones_reducidas.tamanio()
+        cols = self.sensores_cultivo_reducidos.tamanio()
+        matriz = RepresentacionMatriz(filas, cols)
+        for j in range(cols):
+            sensor = self.sensores_cultivo_reducidos.obtener_en(j)
+            actual = sensor.registros.primero
+            while actual:
+                reg = actual.contenido
+                i = self.estaciones_reducidas.buscar_por_atributo('id', reg.id_estacion)
+                if i != -1:
+                    matriz.asignar(i, j, reg)
+                actual = actual.siguiente
+        return matriz
